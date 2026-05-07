@@ -1,0 +1,24 @@
+{
+  "editor.wordWrap": "on",
+  "editor.lineNumbers": "off",
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "selection",
+  "editor.quickSuggestions": {
+    "comments": "off",
+    "strings": "off",
+    "other": "off"
+  },
+  "editor.fontLigatures": true,
+  "editor.fontSize": 16,
+  "editor.lineHeight": 1.8,
+  "zenMode.fullScreen": false,
+  "zenMode.centerLayout": true,
+  "markdown.preview.scrollPreviewWithEditor": true,
+  "markdown.preview.scrollEditorWithPreview": true,
+  "workbench.editor.enablePreview": false,
+  "[markdown]": {
+    "editor.fontFamily": "KingHwaOldSong",
+    "editor.fontSize": 18,
+    "editor.lineHeight": 32
+  }
+}
