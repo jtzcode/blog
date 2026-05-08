@@ -182,24 +182,29 @@ Agent 知道了新的做事方式，也可能忘记了已有的做事方式。
 
 ## 什么时候遗忘
 
-我使用觉得遗忘也是智能的一部分。
+我始终觉得**遗忘也是智能的一部分**。
 
-一个永远不忘的 agent 会出现几个问题：
+一个永远不会遗忘的 Agent 会出现几个问题：
 
-- 旧偏好污染新偏好
 - 临时事实被当成长期事实
 - 过期项目状态影响决策
 - 低价值细节挤占检索空间
 - 过去失败经验被过度泛化
-- 记忆越多，检索越慢、噪声越大
+- 记忆臃肿影响检索效率
 
-agent 的遗忘不应该首先设计成“删除”，而应该设计成“可访问性下降”。真正删除只用于隐私、安全、用户明确要求、法律合规和确认无价值的垃圾信息。
+Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成“可访问性下降”。真正的删除应该只用于隐私、安全、用户要求、法律合规以及确认无价值的垃圾信息。
 
-这点很像人类记忆。人类遗忘很多时候不是痕迹彻底消失，而是变得更难被线索激活；有些记忆在特定线索、情境或强化后又能被唤起。
+这点很像人类记忆。人类遗忘很多时候不是痕迹彻底消失，而是变得更难被线索激活。有些记忆只有在特定线索、情境或强化后才能再次被唤起。
 
-近年的 agent memory 研究也在往这个方向走，比如 Oblivion 明确把遗忘定义为 accessibility decay，而不是 explicit deletion。[参考文献](https://arxiv.org/abs/2604.00131)
+近年的 Agent 记忆研究也在往这个方向走，比如 `Oblivion` 框架 [^12] 明确把遗忘定义为 `Accessibility Decay`，而不是 `Explicit Deletion`。设计遗忘机制时，记忆的写入和检索的过程同样重要。
 
-更进一步，遗忘可以分为四种类型：
+`Oblivion` 框架把记忆的处理分成 Read Path 和 Write Path。简单来说，Read Path 判断对于一个查询，当前工作记忆是否够用，如果不够，就去检索长期记忆。Write Path 决定哪些记忆应该被强化，没有被强化的记忆，其可访问性随着时间推移会逐渐衰减。
+
+![Oblivion](../../images/read-write-path.png)
+
+这与我们阅读的经验很类似。在阅读一本书或文章时，如果出现一个之前理解过的概念，当前上下文没有，那么就会提取这个概念相关的理解记忆，这就是 Read Path 逻辑；如果这个概念反复出现，相关的理解记忆就会被强化，这就是 Write Path 逻辑。如果这个概念只出现过一次，你可能就忘了之前是如何理解它的。
+
+从这个思路出发，遗忘可以大致分为四种类型：
 
 | 类型                            | 含义               | 是否删除原始数据 |
 | ----------------------------- | ---------------- | -------- |
@@ -208,42 +213,31 @@ agent 的遗忘不应该首先设计成“删除”，而应该设计成“可�
 | **Supersession**              | 旧事实被新事实替代，但历史仍保留 | 否        |
 | **Hard Deletion**             | 彻底删除或不可恢复删除      | 是        |
 
+遗忘和记忆本是一体两面的事情，可以对比前面四种记忆类型来思考四种遗忘类型：
+
 ![Forgetting](../../images/forgetting.png)
-
-很多系统只在写入时判断要不要记忆，但遗忘更应该发生在检索时。
-
-最近的 Oblivion 很有启发：它把 memory control 拆成 read path 和 write path。read path 决定什么时候查 memory，避免 always-on retrieval；write path 决定哪些记忆应该被强化。它的核心思想是：遗忘是可访问性的衰减，而不是删除。
 
 遗忘机制设计的可以参考这几个原则：
 
 **原则一：默认先降权，不默认删除**
 
-删除是不可逆操作，应该谨慎。大多数遗忘应该是 accessibility decay。
+删除是不可逆操作，应该谨慎。大多数遗忘应该是 Accessibility Decay。
 
-**原则二：不同 memory 类型用不同衰减率**
+**原则二：不同记忆类型用不同衰减率**
 
-临时上下文快衰减；用户明确偏好慢衰减；工具验证过的事实慢衰减；未验证推断快衰减。
+比如，临时上下文快衰减，用户明确偏好慢衰减；工具验证过的事实慢衰减，未经验证的推断快衰减。
 
-**原则三：旧事实不要删除，要标记 validity**
+**原则三：记忆被使用后要重新评估**
 
-这能避免 agent 没有时间感。旧事实可能对历史问题仍然有用。
+调用一次记忆，不只是读取和检索，也应该触发重新巩固或强化，就像 `Oblivion` 框架的 Read/Write Path 一样。
 
-**原则四：记忆被使用后要重新评估**
+**原则四：遗忘要有用户控制**
 
-调用一次 memory，不只是 read，也应该触发 reconsolidation check。
+比如，用户可以明确要求：
 
-**原则五：遗忘要有用户控制**
-
-用户可以明确要求：
-
-- 忘掉这个
-- 这条记忆错了
+- 忘掉这个事实
 - 这个只在本项目有效
 - 这不是我的长期偏好
-
-**原则六：保留原始证据，衰减检索索引**
-
-除非合规或用户要求删除，否则不要轻易丢原始 episode。真正需要动态衰减的是检索层、语义层和 latent memory 激活层。
 
 总结：
 ![](../../images/human-agent-memory.png)
@@ -252,56 +246,9 @@ agent 的遗忘不应该首先设计成“删除”，而应该设计成“可�
 
 ### 1. Human Memory Foundations
 
-#### Working Memory
-
-- Baddeley, A. D., & Hitch, G. (1974). **Working Memory**.  
-  Recommended for understanding working memory as an active, limited-capacity workspace for the current task.  
-  Relevance: maps to agent `Working Memory`: current request, recent context, active plan, tool results.  
-  Source: https://app.nova.edu/toolbox/instructionalproducts/edd8124/fall11/1974-Baddeley-and-Hitch.pdf
-
-#### Episodic and Semantic Memory
-
-- Tulving, E. (1972). **Episodic and Semantic Memory**.  
-  Foundational paper distinguishing personal event memory from general conceptual/factual knowledge.  
-  Relevance: maps to agent `Episodic Memory` and `Semantic Memory`.  
-  Source: https://alicekim.ca/EMSM72.pdf
-
-#### Procedural Memory / Knowing How vs Knowing That
-
-- Cohen, N. J., & Squire, L. R. (1980). **Preserved Learning and Retention of Pattern-Analyzing Skill in Amnesia: Dissociation of Knowing How and Knowing That**.  
-  Classic evidence that skill learning can be separated from declarative fact/event memory.  
-  Relevance: maps to agent `Procedural Memory`: workflows, skills, playbooks, policies.  
-  Source: https://pubmed.ncbi.nlm.nih.gov/7414331/
-
-#### Sleep and Memory Consolidation
-
-- Rasch, B., & Born, J. (2013). **About Sleep’s Role in Memory**.  
-  A major review on sleep-dependent memory consolidation, including replay, stabilization, and integration.  
-  Relevance: inspires agent `sleep-like consolidation`: batch replay, clustering, abstraction, skill distillation.  
-  Source: https://pubmed.ncbi.nlm.nih.gov/23589831/
-
-#### Engram / Memory Traces
-
-- Liu, X., Ramirez, S., Pang, P. T., et al. (2012). **Optogenetic Stimulation of a Hippocampal Engram Activates Fear Memory Recall**.  
-  Landmark work showing that reactivating hippocampal engram cells can trigger memory recall behavior in mice.  
-  Relevance: useful for thinking about memory as reactivatable traces, not stored files.  
-  Source: https://www.nature.com/articles/nature11028
-
-- Josselyn, S. A., & Tonegawa, S. (2020). **Memory Engrams: Recalling the Past and Imagining the Future**.  
-  Review of engram theory and how memory traces support recall and reconstruction.  
-  Relevance: connects human memory traces with MSA-like latent trace memory.  
-  Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC7577560/
-
 ---
 
 ### 2. Cognitive Architectures and Agent Memory Frameworks
-
-#### CoALA
-
-- Sumers, T. R., Yao, S., Narasimhan, K., & Griffiths, T. L. (2023/2024). **Cognitive Architectures for Language Agents**.  
-  The most important high-level framework for mapping cognitive architecture ideas to language agents.  
-  Relevance: directly uses working, episodic, semantic, and procedural memory for language agents.  
-  Source: https://arxiv.org/abs/2309.02427
 
 #### MemGPT / Letta
 
@@ -374,26 +321,6 @@ agent 的遗忘不应该首先设计成“删除”，而应该设计成“可�
 
 ---
 
-### 5. Latent / Attention-Native Memory
-
-#### MSA
-
-- Chen, Y., Chen, R., Yi, S., et al. (2026). **MSA: Memory Sparse Attention for Efficient End-to-End Memory Model Scaling to 100M Tokens**.  
-  Introduces Memory Sparse Attention, which encodes long-term memory into latent memory states and retrieves them through sparse attention.  
-  Relevance: closest to the idea of memory traces participating directly in reasoning rather than being inserted as text.  
-  Source: https://arxiv.org/abs/2603.23516
-
----
-
-### 6. Forgetting, Decay, and Memory Governance
-
-#### Oblivion
-
-- Rana, A., Hung, C.-C., Sun, Q., Kunkel, J. M., & Lawrence, C. (2026). **Oblivion: Self-Adaptive Agentic Memory Control through Decay-Driven Activation**.  
-  Defines forgetting as decay-driven reduction in accessibility rather than explicit deletion.  
-  Relevance: directly supports the design principle that most forgetting should lower retrieval accessibility before deleting evidence.  
-  Source: https://arxiv.org/abs/2604.00131
-
 ## 参考文献
 
 [^1]: https://www.annualreviews.org/doi/pdf/10.1146/annurev.psych.49.1.289
@@ -407,3 +334,4 @@ agent 的遗忘不应该首先设计成“删除”，而应该设计成“可�
 [^9]: https://www.nature.com/articles/s41539-024-00244-8
 [^10]: https://link.springer.com/article/10.3758/s13423-025-02665-x
 [^11]: https://www.nature.com/articles/s41593-023-01382-9
+[^12]: https://arxiv.org/abs/2604.00131
