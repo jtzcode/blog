@@ -8,7 +8,7 @@ tags:
   - Memory
 lang: zh
 featured: false
-draft: true
+draft: false
 ---
 
 # AI Agent 记忆如何构建
@@ -66,13 +66,13 @@ MSA 的思想是，让长期记忆以**潜在状态**（Latent States）的形�
 
 这里有一个对比图：
 
-![RAG Architecture](../../images/rag-msa-human.png)
+![RAG Architecture](../images/rag-msa-human.png)
 
 ## 记忆的巩固
 
 我们先从另一个角度看记忆的分类。这里有一张所谓的四层记忆图：
 
-![Memory Types](../../images/agent-memory.png)
+![Memory Types](../images/agent-memory.png)
 
 是不是很眼熟？很多讨论 Agent 记忆的文章都会引用这篇论文[^8]，将 Agent 记忆分为上述四层结构或者四种类型。
 
@@ -178,9 +178,9 @@ Agent 知道了新的做事方式，也可能忘记了已有的做事方式。
 - 被验证过的项目事实
 - 可复用的 Troubleshooting 方法
 
-![Consolidation](../../images/consolidation.png)
+![Consolidation](../images/consolidation.png)
 
-## 什么时候遗忘
+## 遗忘
 
 我始终觉得**遗忘也是智能的一部分**。
 
@@ -198,9 +198,9 @@ Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成�
 
 近年的 Agent 记忆研究也在往这个方向走，比如 `Oblivion` 框架 [^12] 明确把遗忘定义为 `Accessibility Decay`，而不是 `Explicit Deletion`。设计遗忘机制时，记忆的写入和检索的过程同样重要。
 
-`Oblivion` 框架把记忆的处理分成 Read Path 和 Write Path。简单来说，Read Path 判断对于一个查询，当前工作记忆是否够用，如果不够，就去检索长期记忆。Write Path 决定哪些记忆应该被强化，没有被强化的记忆，其可访问性随着时间推移会逐渐衰减。
+`Oblivion` 框架把记忆的处理分成 `Read Path` 和 `Write Path`。简单来说，Read Path 判断对于一个查询，当前工作记忆是否够用；如果不够，就去检索长期记忆。Write Path 决定哪些记忆应该被强化；没有被强化的记忆，其可访问性随着时间推移会逐渐衰减。
 
-![Oblivion](../../images/read-write-path.png)
+![Oblivion](../images/read-write-path.png)
 
 这与我们阅读的经验很类似。在阅读一本书或文章时，如果出现一个之前理解过的概念，当前上下文没有，那么就会提取这个概念相关的理解记忆，这就是 Read Path 逻辑；如果这个概念反复出现，相关的理解记忆就会被强化，这就是 Write Path 逻辑。如果这个概念只出现过一次，你可能就忘了之前是如何理解它的。
 
@@ -215,7 +215,7 @@ Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成�
 
 遗忘和记忆本是一体两面的事情，可以对比前面四种记忆类型来思考四种遗忘类型：
 
-![Forgetting](../../images/forgetting.png)
+![Forgetting](../images/forgetting.png)
 
 遗忘机制设计的可以参考这几个原则：
 
@@ -239,90 +239,36 @@ Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成�
 - 这个只在本项目有效
 - 这不是我的长期偏好
 
-总结：
-![](../../images/human-agent-memory.png)
+## 开源项目简析
 
-## 延伸阅读
+这里选取几个比较有代表性的开源或商业项目，结合前面的讨论，简要分析这些项目在 Agent 记忆方面的设计思路和特点，仅供参考。
 
-### 1. Human Memory Foundations
+### 1. LangMem
+LangMem [^13] 使得 LangGraph 应用可以把记忆能力变成 Agent 可直接使用的组件。它支持情节、语义和程序三类记忆。它还区分 Hot Path Memory Formation 和 Background Memory Formation，也就是可以让 Agent 在交互中主动写入记忆，也可以在后台异步总结和巩固。
 
----
+### 2. Mem0
+Mem0 [^14] 的特点是把长期记忆包装成一个通用 Memory Layer，把对话历史压缩成可检索、可更新、可扩展的长期用户记忆。支持托管和 Self-Hosted 部署。它的 `Memory Add Pipeline` 会从消息中抽取关键事实、偏好或决策，并通过重复/冲突检查后存入向量数据库或图数据库 。
 
-### 2. Cognitive Architectures and Agent Memory Frameworks
+![](https://mintcdn.com/mem0/k4LG2Flv5533NbwL/images/add_architecture.png?w=1650&fit=max&auto=format&n=k4LG2Flv5533NbwL&q=85&s=6d26a820f1b7b9e2dd7517b7b3ec2aa4)
 
-#### MemGPT / Letta
+### 3. MemPalace
+MemPalace [^15] 倾向于保存原始对话内容，尽量不丢失信息。结构上采用 Palace 模型：People/Projects 是 `Wings`，Topics 是 `Rooms`，原始内容放在 `Drawers` 中。因此检索不是直接针对一个扁平的向量数据库，而是可以按空间层次结构缩小搜索范围。
 
-- Packer, C., Wooders, S., Lin, K., Fang, V., Patil, S. G., Stoica, I., & Gonzalez, J. E. (2023). **MemGPT: Towards LLMs as Operating Systems**.  
-  Introduces virtual context management and memory tiers inspired by operating systems.  
-  Relevance: helps understand working memory vs archival memory, and why context must be managed rather than simply expanded.  
-  Source: https://arxiv.org/abs/2310.08560
+![](../images/palace.png)
 
-- Letta Documentation. **Memory Management / Core, Recall, and Archival Memory**.  
-  Productized continuation of MemGPT-style memory management.  
-  Relevance: useful for seeing how agent-controlled memory tools are exposed in practice.  
-  Source: https://docs.letta.com/concepts/memory-management/
+MemPalace 的核心思想是“先完整保存，再结构化找回”，适合需要保留原始证据、跨 Agent 协作和本地优先的开发记忆场景。张汉东老师有一本开源的书 [^16]，详细解读了 MemPalace 的设计思路和实现细节，推荐阅读。
 
----
+### 4. MemOS
 
-### 3. Long-Term Agent Memory Systems
+MemOS [^17] 特点是系统性最强，它不是只做 RAG 或 Memory API，而是试图把记忆变成类似操作系统资源一样被表示、调度、迁移和治理。论文提出 MemCube 作为标准化记忆抽象，用来封装不同类型的记忆，并支持追踪、融合和迁移。
 
-#### Zep / Graphiti
+MemOS 是最接近“记忆基础设施”的方案，它关注的不只是存取记忆，而是记忆的类型、生命周期、调度、权限、迁移和跨任务复用。
 
-- Rasmussen, P., Paliychuk, P., Beauvais, T., Ryan, J., & Chalef, D. (2025). **Zep: A Temporal Knowledge Graph Architecture for Agent Memory**.  
-  Proposes a temporal knowledge graph architecture for long-term agent memory.  
-  Relevance: especially important for semantic memory, source/time-aware facts, fact invalidation, and relationship evolution.  
-  Source: https://arxiv.org/abs/2501.13956
+## 总结
+![](../images/human-agent-memory.png)
 
-#### A-MEM
-
-- Xu, W., Liang, Z., Mei, K., Gao, H., Tan, J., & Zhang, Y. (2025). **A-MEM: Agentic Memory for LLM Agents**.  
-  Proposes a dynamic, Zettelkasten-inspired memory network for LLM agents.  
-  Relevance: closest to memory evolution, linking, and reconsolidation-like updating.  
-  Source: https://arxiv.org/abs/2502.12110
-
-#### MemoryOS
-
-- Kang, J., et al. (2025). **Memory OS of AI Agent**.  
-  Proposes a hierarchical memory operating system for personalized AI agents.  
-  Relevance: useful for studying short-term, mid-term, and long-term memory update pipelines.  
-  Source: https://aclanthology.org/2025.emnlp-main.1318/
-
-#### LangMem / LangGraph Memory
-
-- LangChain. (2025). **LangMem SDK for Agent Long-Term Memory**.  
-  SDK for extracting, updating, and consolidating long-term agent memory.  
-  Relevance: practical engineering reference for memory extraction, consolidation, and personalization.  
-  Source: https://www.langchain.com/blog/langmem-sdk-launch
-
-#### Mem0
-
-- Mem0. **Universal / Self-Improving Memory Layer for LLM Applications**.  
-  Product-oriented memory layer for persistent context and user personalization.  
-  Relevance: useful for application-level memory APIs and personalization memory.  
-  Source: https://docs.mem0.ai/platform/overview
-
-#### MemPalace
-
-- MemPalace. **Open-source AI Memory System / Memory Palace for Agents**.  
-  Local-first memory system using memory-palace-inspired organization and MCP integration.  
-  Relevance: useful for episodic archive, verbatim-first memory, and agent-accessible memory tooling.  
-  Source: https://github.com/mempalace/mempalace
-
----
-
-### 4. Memory as a System Resource
-
-#### MemOS
-
-- Li, Z., Song, S., Xi, C., et al. (2025). **MemOS: A Memory OS for AI System**.  
-  Treats memory as a first-class system resource and unifies plaintext memory, activation-based memory, and parameter-level memory.  
-  Relevance: probably the most complete conceptual direction for memory lifecycle, provenance, versioning, scheduling, and memory evolution.  
-  Source: https://arxiv.org/abs/2507.03724
-
----
 
 ## 参考文献
-
 [^1]: https://www.annualreviews.org/doi/pdf/10.1146/annurev.psych.49.1.289
 [^2]: https://wixtedlab.ucsd.edu/publications/Psych%20218/Tulving_Thompson_1973.pdf
 [^3]: https://pmc.ncbi.nlm.nih.gov/articles/PMC7577560
@@ -335,3 +281,8 @@ Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成�
 [^10]: https://link.springer.com/article/10.3758/s13423-025-02665-x
 [^11]: https://www.nature.com/articles/s41593-023-01382-9
 [^12]: https://arxiv.org/abs/2604.00131
+[^13]: https://www.langchain.com/blog/langmem-sdk-launch
+[^14]: https://docs.mem0.ai/platform/overview
+[^15]: https://github.com/mempalace/mempalace
+[^16]: https://zhanghandong.github.io/mempalace-book/
+[^17]: https://arxiv.org/abs/2507.03724
