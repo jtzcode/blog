@@ -4,7 +4,10 @@ import test from "node:test";
 
 test("built post pages only expose X and email share links", async () => {
   const html = await readFile(
-    new URL("../dist/posts/zh/ai-coding/index.html", import.meta.url),
+    new URL(
+      "../dist/posts/software-engineering/fragment-20260403/index.html",
+      import.meta.url
+    ),
     "utf8"
   );
 

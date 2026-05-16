@@ -1,0 +1,28 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Main from "@/layouts/Main.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import SectionSwitcher from "@/components/SectionSwitcher.astro";
+import SectionPostList from "@/components/SectionPostList.astro";
+import { getSectionPosts } from "@/utils/getSectionPosts";
+import { SECTIONS, SITE } from "@/config";
+
+const section = SECTIONS.find(({ code }) => code === "software-engineering")!;
+const posts = await getSectionPosts(section.code);
+---
+
+<Layout
+  title={`${section.label} | ${SITE.title}`}
+  description={section.description}
+>
+  <Header />
+  <Main pageTitle={section.label} pageDesc={section.description}>
+    <SectionSwitcher />
+    <SectionPostList
+      posts={posts}
+      emptyMessage="Software engineering posts will appear here soon."
+    />
+  </Main>
+  <Footer />
+</Layout>

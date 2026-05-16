@@ -2,47 +2,57 @@
 import { getRelativeUrl, stripBasePath } from "@/utils/getRelativeUrl";
 
 const currentUrlPath = stripBasePath(Astro.url.pathname).replace(/\/+$/, "");
-const breadcrumbList = currentUrlPath.split("/").slice(1);
+const segments = currentUrlPath.split("/").filter(Boolean);
 
-if (breadcrumbList[0] === "posts") {
-  breadcrumbList.splice(0, 2, `Posts (page ${breadcrumbList[1] || 1})`);
-}
+const labels: Record<string, string> = {
+  posts: "文章",
+  tags: "标签",
+  archives: "归档",
+  about: "关于",
+  search: "搜索",
+  "software-engineering": "软件工程",
+  "ai-research": "AI 研究",
+};
 
-if (breadcrumbList[0] === "tags" && !isNaN(Number(breadcrumbList[2]))) {
-  breadcrumbList.splice(
-    1,
-    3,
-    `${breadcrumbList[1]} ${Number(breadcrumbList[2]) === 1 ? "" : "(page " + breadcrumbList[2] + ")"}`
-  );
-}
+const breadcrumbList = segments.map((segment, index) => {
+  const isPageNumber =
+    (segments[0] === "posts" || segments[0] === "tags") &&
+    !Number.isNaN(Number(segment)) &&
+    index > 0;
+  const label = isPageNumber
+    ? `第 ${segment} 页`
+    : labels[segment] || decodeURIComponent(segment);
+
+  return {
+    label,
+    href: getRelativeUrl(`/${segments.slice(0, index + 1).join("/")}/`),
+  };
+});
 ---
 
-<nav class="app-layout mt-8 mb-1" aria-label="breadcrumb">
+<nav class="app-layout mt-8 mb-1" aria-label="面包屑导航">
   <ul
     class="font-light [&>li]:inline [&>li:not(:last-child)>a]:hover:opacity-100"
   >
     <li>
-      <a href={getRelativeUrl("/")} class="opacity-80">Home</a>
+      <a href={getRelativeUrl("/")} class="opacity-80">首页</a>
       <span aria-hidden="true" class="opacity-80">&raquo;</span>
     </li>
     {
-      breadcrumbList.map((breadcrumb, index) =>
+      breadcrumbList.map(({ label, href }, index) =>
         index + 1 === breadcrumbList.length ? (
           <li>
             <span
               class:list={["capitalize opacity-75", { lowercase: index > 0 }]}
               aria-current="page"
             >
-              {decodeURIComponent(breadcrumb)}
+              {label}
             </span>
           </li>
         ) : (
           <li>
-            <a
-              href={getRelativeUrl(`/${breadcrumb}/`)}
-              class="capitalize opacity-70"
-            >
-              {breadcrumb}
+            <a href={href} class="capitalize opacity-70">
+              {label}
             </a>
             <span aria-hidden="true">&raquo;</span>
           </li>

@@ -1,6 +1,6 @@
 # jtzcode blog
 
-A bilingual Astro blog for `https://jtzcode.github.io/ai-blog/`, based on AstroPaper and deployed with GitHub Pages.
+An Astro blog for `https://jtzcode.github.io/`, organized around 软件工程 and AI 研究, based on AstroPaper and deployed with GitHub Pages.
 
 ## Local development
 
@@ -28,8 +28,8 @@ npm run format:check
 
 Create a Markdown file in one of these folders:
 
-- `src/data/blog/en/` for English posts
-- `src/data/blog/zh/` for Chinese posts
+- `src/data/blog/software-engineering/` for 软件工程 posts
+- `src/data/blog/ai-research/` for AI 研究 posts
 
 Example frontmatter:
 
@@ -41,8 +41,7 @@ pubDatetime: 2026-04-02T12:00:00Z
 tags:
   - ai
   - notes
-lang: en
-translationKey: optional-shared-key
+lang: zh
 featured: false
 ---
 

@@ -33,7 +33,6 @@ draft: false
 - 与既有知识和图式重新组合
 - 生成当下这一次记忆
 
-
 下面我们就看看，在 Agent 记忆系统设计上有哪些尝试，是否在某些方面可以借鉴人类的记忆机制。
 
 ## Agent 记忆类型
@@ -80,12 +79,12 @@ MSA 的思想是，让长期记忆以**潜在状态**（Latent States）的形�
 
 在那篇文章中，这个映射如下：
 
-| Soar 原版 | CoALA 适配 |
-| --- | --- |
+| Soar 原版                         | CoALA 适配                                                      |
+| --------------------------------- | --------------------------------------------------------------- |
 | 工作记忆 = 当前感知+目标+中间结果 | 工作记忆 = 多次 LLM 调用持久的数据结构（Prompt + 解析后的输出） |
-| 程序记忆 = 生成式规则 | 程序记忆 = LLM 权重（隐式）+ Agent 源代码（显式） |
-| 语义记忆 = 世界事实 | 语义记忆 = 可检索的知识库（可由 Agent 自己写入） |
-| 情节记忆 = 过去行为序列 | 情节记忆 = 训练样本/历史轨迹/过往经验 |
+| 程序记忆 = 生成式规则             | 程序记忆 = LLM 权重（隐式）+ Agent 源代码（显式）               |
+| 语义记忆 = 世界事实               | 语义记忆 = 可检索的知识库（可由 Agent 自己写入）                |
+| 情节记忆 = 过去行为序列           | 情节记忆 = 训练样本/历史轨迹/过往经验                           |
 
 注意，它把**程序记忆**分成了两类：
 
@@ -101,8 +100,8 @@ Agent 的代码本身是一种显式记忆。因此，
 Agent 知道了新的做事方式，也可能忘记了已有的做事方式。
 
 ---
-### <center>警惕“拿来主义“</center>
 
+### <center>警惕“拿来主义“</center>
 
 当一个系统涉及智能、记忆、学习等概念和功能时，我们喜欢借鉴人类认知科学的研究和理论，指导工程上的设计，这种做法是符合直觉的但也值得警惕。
 
@@ -124,7 +123,7 @@ Agent 知道了新的做事方式，也可能忘记了已有的做事方式。
 
 实际系统的实现可能是：先存为情节记忆，保留完整轨迹，然后用 LLM 反思、沉淀生成语义记忆。但这个两步过程是手动设计的：什么时候触发反思、沉淀的粒度是什么、要不要保留原始情节，都是需要回答的问题。
 
-（*这只是一个提醒。最近在看《智能简史》，愈发觉得人类智能设计的精妙，很难忍住不去借鉴一二。* 😄）
+（_这只是一个提醒。最近在看《智能简史》，愈发觉得人类智能设计的精妙，很难忍住不去借鉴一二。_ 😄）
 
 ---
 
@@ -173,6 +172,7 @@ Agent 知道了新的做事方式，也可能忘记了已有的做事方式。
 - 没有证据支持的推断
 
 优先巩固这类记忆：
+
 - 用户明确偏好
 - 多次重复出现的模式
 - 被验证过的项目事实
@@ -206,12 +206,12 @@ Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成�
 
 从这个思路出发，遗忘可以大致分为四种类型：
 
-| 类型                            | 含义               | 是否删除原始数据 |
-| ----------------------------- | ---------------- | -------- |
-| **Accessibility Decay**       | 记忆还在，但默认不容易被检索出来 | 否        |
-| **Compression / Abstraction** | 细节被压缩，只保留高层语义或方法 | 原始数据可归档  |
-| **Supersession**              | 旧事实被新事实替代，但历史仍保留 | 否        |
-| **Hard Deletion**             | 彻底删除      | 是        |
+| 类型                          | 含义                             | 是否删除原始数据 |
+| ----------------------------- | -------------------------------- | ---------------- |
+| **Accessibility Decay**       | 记忆还在，但默认不容易被检索出来 | 否               |
+| **Compression / Abstraction** | 细节被压缩，只保留高层语义或方法 | 原始数据可归档   |
+| **Supersession**              | 旧事实被新事实替代，但历史仍保留 | 否               |
+| **Hard Deletion**             | 彻底删除                         | 是               |
 
 遗忘和记忆本是一体两面的事情，可以对比前面四种记忆类型来思考四种遗忘类型：
 
@@ -244,14 +244,17 @@ Agent 的遗忘机制的出发点不应该是“删除”，而应该设计成�
 这里选取几个比较有代表性的开源或商业项目，结合前面的讨论，简要分析这些项目在 Agent 记忆方面的设计思路和特点，仅供参考。
 
 ### 1. LangMem
+
 LangMem [^13] 使得 LangGraph 应用可以把记忆能力变成 Agent 可直接使用的组件。它支持情节、语义和程序三类记忆。它还区分 Hot Path Memory Formation 和 Background Memory Formation，也就是可以让 Agent 在交互中主动写入记忆，也可以在后台异步总结和巩固。
 
 ### 2. Mem0
+
 Mem0 [^14] 的特点是把长期记忆包装成一个通用 Memory Layer，把对话历史压缩成可检索、可更新、可扩展的长期用户记忆。支持托管和 Self-Hosted 部署。它的 `Memory Add Pipeline` 会从消息中抽取关键事实、偏好或决策，并通过重复/冲突检查后存入向量数据库或图数据库 。
 
 ![](https://mintcdn.com/mem0/k4LG2Flv5533NbwL/images/add_architecture.png?w=1650&fit=max&auto=format&n=k4LG2Flv5533NbwL&q=85&s=6d26a820f1b7b9e2dd7517b7b3ec2aa4)
 
 ### 3. MemPalace
+
 MemPalace [^15] 倾向于保存原始对话内容，尽量不丢失信息。结构上采用 Palace 模型：People/Projects 是 `Wings`，Topics 是 `Rooms`，原始内容放在 `Drawers` 中。因此检索不是直接针对一个扁平的向量数据库，而是可以按空间层次结构缩小搜索范围。
 
 ![](../images/palace.png)
@@ -270,22 +273,38 @@ MemOS 是最接近“记忆基础设施”的方案，它关注的不只是存�
 
 ![](../images/human-agent-memory.png)
 
-
 ## 参考文献
+
 [^1]: https://www.annualreviews.org/doi/pdf/10.1146/annurev.psych.49.1.289
+
 [^2]: https://wixtedlab.ucsd.edu/publications/Psych%20218/Tulving_Thompson_1973.pdf
+
 [^3]: https://pmc.ncbi.nlm.nih.gov/articles/PMC7577560
+
 [^4]: https://www.nature.com/articles/s41562-023-01799-z
-[^5]: Bennett, M. (2023). **A Brief History of Intelligence**. Dutton. (中文版：班尼特. 《智能简史》) 
+
+[^5]: Bennett, M. (2023). **A Brief History of Intelligence**. Dutton. (中文版：班尼特. 《智能简史》)
+
 [^6]: Chen, Y., Chen, R., Yi, S., et al. (2026). **MSA: Memory Sparse Attention for Efficient End-to-End Memory Model Scaling to 100M Tokens**. https://arxiv.org/abs/2603.23516
+
 [^7]: https://www.sciencedirect.com/science/article/abs/pii/S0306452224002306
+
 [^8]: Sumers, T. R., Yao, S., Narasimhan, K., & Griffiths, T. L. (2023/2024). **Cognitive Architectures for Language Agents**. https://arxiv.org/abs/2309.02427
+
 [^9]: https://www.nature.com/articles/s41539-024-00244-8
+
 [^10]: https://link.springer.com/article/10.3758/s13423-025-02665-x
+
 [^11]: https://www.nature.com/articles/s41593-023-01382-9
+
 [^12]: https://arxiv.org/abs/2604.00131
+
 [^13]: https://www.langchain.com/blog/langmem-sdk-launch
+
 [^14]: https://docs.mem0.ai/platform/overview
+
 [^15]: https://github.com/mempalace/mempalace
+
 [^16]: https://zhanghandong.github.io/mempalace-book/
+
 [^17]: https://arxiv.org/abs/2507.03724

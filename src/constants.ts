@@ -15,7 +15,7 @@ export const SOCIALS: Social[] = [
   {
     name: "GitHub",
     href: "https://github.com/jtzcode",
-    linkTitle: `${SITE.title} on GitHub`,
+    linkTitle: `${SITE.title} 的 GitHub`,
     icon: IconGitHub,
   },
 ] as const;
@@ -24,13 +24,13 @@ export const SHARE_LINKS: Social[] = [
   {
     name: "X",
     href: "https://x.com/intent/post?url=",
-    linkTitle: "Share this post on X",
+    linkTitle: "分享到 X",
     icon: IconBrandX,
   },
   {
     name: "Mail",
     href: "mailto:?subject=See%20this%20post&body=",
-    linkTitle: "Share this post via email",
+    linkTitle: "通过邮件分享",
     icon: IconMail,
   },
 ] as const;

@@ -16,7 +16,6 @@ import { SITE } from "./src/config";
 
 export default defineConfig({
   site: "https://jtzcode.github.io",
-  base: "/ai-blog",
   integrations: [
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),

@@ -1,8 +1,8 @@
 ---
-import type { SiteLocale } from "@/config";
+import type { PostLanguage } from "@/config";
 
 interface Props {
-  lang: SiteLocale;
+  lang: PostLanguage;
 }
 
 const { lang } = Astro.props;
@@ -13,7 +13,7 @@ const category = import.meta.env.PUBLIC_GISCUS_CATEGORY;
 const categoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
 
 const enabled = Boolean(repo && repoId && category && categoryId);
-const heading = lang === "zh" ? "讨论" : "Discussion";
+const heading = "讨论";
 const giscusLang = lang === "zh" ? "zh-CN" : "en";
 ---
 

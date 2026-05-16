@@ -1,23 +1,19 @@
-import { BLOG_PATH } from "@/content.config";
 import { getRelativeUrl } from "./getRelativeUrl";
-import { slugifyStr } from "./slugify";
+import { getPostPathSegments } from "./getPostSection";
 
 export function getPath(
   id: string,
   filePath: string | undefined,
   includeBase = true
 ) {
-  const pathSegments = filePath
-    ?.replace(BLOG_PATH, "")
-    .split("/")
-    .filter(path => path !== "")
-    .filter(path => !path.startsWith("_"))
-    .slice(0, -1)
-    .map(segment => slugifyStr(segment));
+  const pathSegments = getPostPathSegments(id, filePath);
 
   const basePath = includeBase ? getRelativeUrl("/posts") : "";
   const blogId = id.split("/");
-  const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
+  const slug = String(blogId.length > 0 ? blogId.slice(-1) : blogId).replace(
+    /\.mdx?$/,
+    ""
+  );
 
   if (!pathSegments || pathSegments.length < 1) {
     return [basePath, slug].join("/");

@@ -117,7 +117,8 @@ MCP official spec and security
 - [MCP security best practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
 - [MCP working / interest groups](https://modelcontextprotocol.io/community/working-interest-groups)
 
-Mem0 / OpenMemory 
+Mem0 / OpenMemory
+
 - [Mem0 MCP docs](https://docs.mem0.ai/platform/mem0-mcp)
 - [Mem0 memory types](https://docs.mem0.ai/core-concepts/memory-types)
 - [Mem0 add memories API](https://docs.mem0.ai/api-reference/memory/add-memories)

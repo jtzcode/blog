@@ -37,16 +37,10 @@ const {
   lang,
 } = post.data;
 
-const labels =
-  lang === "zh"
-    ? {
-        previous: "上一篇",
-        next: "下一篇",
-      }
-    : {
-        previous: "Previous Post",
-        next: "Next Post",
-      };
+const labels = {
+  previous: "上一篇",
+  next: "下一篇",
+};
 
 const { Content } = await render(post);
 
@@ -74,13 +68,11 @@ const layoutProps = {
   scrollSmooth: true,
 };
 
-const siblingPosts = posts
-  .filter(candidate => candidate.data.lang === lang)
-  .map(({ data: { title }, id, filePath }) => ({
-    id,
-    title,
-    filePath,
-  }));
+const siblingPosts = posts.map(({ data: { title }, id, filePath }) => ({
+  id,
+  title,
+  filePath,
+}));
 
 const currentPostIndex = siblingPosts.findIndex(
   candidate => candidate.id === post.id
@@ -118,9 +110,13 @@ const nextPost =
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
-    <div id="busuanzi-wrap" class="my-1 flex items-center gap-1 text-sm opacity-70" style="display:none!important">
+    <div
+      id="busuanzi-wrap"
+      class="my-1 flex items-center gap-1 text-sm opacity-70"
+      style="display:none!important"
+    >
       <span id="busuanzi_container_page_pv">
-        {lang === "zh" ? "阅读 " : "Views: "}
+        阅读{" "}
         <span id="busuanzi_value_page_pv">...</span>
       </span>
     </div>

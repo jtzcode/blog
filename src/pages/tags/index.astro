@@ -12,9 +12,9 @@ const posts = await getCollection("blog");
 const tags = getUniqueTags(posts);
 ---
 
-<Layout title={`Tags | ${SITE.title}`}>
+<Layout title={`标签 | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Tags" pageDesc="Tags used across English and Chinese posts.">
+  <Main pageTitle="标签" pageDesc="软件工程和 AI 研究文章使用的标签。">
     <ul class="flex flex-wrap gap-6">
       {tags.map(({ tag, tagName }) => <Tag {tag} {tagName} />)}
     </ul>
