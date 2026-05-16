@@ -1,5 +1,5 @@
 export const SITE = {
-  website: "https://jtzcode.github.io/",
+  website: "https://jtzcode.github.io/blog/",
   author: "jtzcode",
   profile: "https://github.com/jtzcode",
   desc: "软件工程与 AI 研究札记。",

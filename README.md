@@ -1,6 +1,6 @@
 # jtzcode blog
 
-An Astro blog for `https://jtzcode.github.io/`, organized around 软件工程 and AI 研究, based on AstroPaper and deployed with GitHub Pages.
+An Astro blog for `https://jtzcode.github.io/blog/`, organized around 软件工程 and AI 研究, based on AstroPaper and deployed with GitHub Pages.
 
 ## Local development
 
