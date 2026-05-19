@@ -1,7 +1,7 @@
 ---
 title: 理解软件工程（5）—— 依赖管理
 description: 挑战和策略
-pubDatetime: 2026-01-03T17:00:00Z
+pubDatetime: 2026-02-03T17:00:00Z
 tags:
   - 软件工程
 lang: zh
