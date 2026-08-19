@@ -121,6 +121,169 @@ SHIPPED
 
 ---
 
+## 4. 让正确性自然显现：
+
+当我们说「理解」一个软件系统的行为时，其实是在说我们知道它在给定的输入下，符合预期的输出是什么。这可以称之为**正确性**（Correctness）。
+
+通常用来保证软件正确性的手段是测试。然而，测试行为经常有延后效应，即使使用测试驱动开发 （TDD），在集成测试方面，依然需要依赖多数模块开发基本完成才能进行。
+
+Dijkstra 却提出一个反直觉的观点：
+
+> **程序设计不是先制造程序，再检查它是否正确；正确性的要求应该从一开始就参与塑造程序。**
+
+也就是**让正确性随着程序的构造自然显现**。下面我尝试通过几个例子来理解这个观点，每个人可以结合自己的实践进行思考和评判。
+
+Dijstra 的原话是：
+
+> it is not our business to make programs, it is our business to design classes of computations...
+
+我们应该设计的不是程序，而是一组计算。程序需要测试来验证正确性，计算过程可以通过证明来验证。理论上，在没有测试的情况下，我们也可以知道计算的正确性。
+
+当然，相比可行性，这个观点的思想性更强一些，我们不可能像做数学证明一样去证明所有程序的正确性（即使对于某些算法程序可以做到），但我们可以通过**不依赖于具体实现的约束和性质**来保证计算的正确性。
+
+假设我们要设计一个最简单的银行转账：
+
+> 从账户 A 向账户 B 转账 100 元。
+
+如果直接去写程序，结果简单明了：
+
+```python
+A.balance -= 100
+B.balance += 100
+```
+然而，转账系统实际面临的问题可能是：
+
+- 账户 A 余额不足怎么办？
+- 转账执行到一半程序崩溃怎么办？
+- 转账请求重复两次怎么办？
+- 两个转账同时发生怎么办？
+- 数据库超时怎么办？
+
+当你问这些问题时，已经从“程序”视角转向了“计算”视角，也就是**设计一类行为**。我们不再关心具体的实现，而是关注系统在各种可能的输入、状态、并发和失败情况下，应该表现出的行为。
+
+
+```text
+资金守恒
+→ ledger / balanced entries
+
+不能透支
+→ atomic conditional debit
+
+重复请求
+→ transfer identity / idempotency
+
+debit + credit 不可分割
+→ transaction boundary
+```
+
+重点不是把实现讲细，而是展示：
+
+> **correctness requirement 可以成为 design heuristic。**
+
+## 3. 库存系统：正确性如何产生新的业务抽象
+
+### 写什么
+
+用另一个领域补强：
+
+> 商品库存不能被重复承诺。
+
+从简单 `stock -= 1` 出发，发现它不足以表达真实业务。
+
+进而产生：
+
+> Reservation。
+
+### 怎么展开
+
+简单展示：
+
+```text
+有限库存不能被重复承诺
+→ reservation
+
+reservation 不能重复释放
+→ idempotent lifecycle
+
+订单状态不能任意跳转
+→ state machine
+```
+
+突出：
+
+> 有时候正确性要求甚至会让我们发现一个原本不存在于技术设计里的业务概念。
+
+---
+
+## 4. Test、Property 与 Proof 的关系
+
+### 写什么
+
+结合 Jasmine `describe / it`。
+
+例如：
+
+```text
+describe("money conservation")
+    it(...)
+    it(...)
+    it(...)
+```
+
+说明：
+
+* `it`：具体 example；
+* `describe`：可以组织一组行为；
+* property / invariant：描述整个 computation class；
+* proof：在明确假设下说明所有合法执行都保持该性质。
+
+### 怎么展开
+
+重点不要讨论形式化验证技术。
+
+只表达：
+
+> invariant 不替代测试；
+> invariant 告诉我们测试究竟在试图破坏什么。
+
+并提出：
+
+> 测试套件最好的状态，是逐渐成为 executable specification，而不是 case 的集合。
+
+---
+
+## 5. Correctness by Construction
+
+### 写什么
+
+把这一章收束到 Dijkstra 第三个 argument。
+
+不是：
+
+```text
+program
+→ test
+→ proof
+```
+
+而是：
+
+```text
+desired behavior
+→ properties
+→ reasoning structure
+→ program structure
+→ tests / verification
+```
+
+### 怎么展开
+
+提出一个核心观点：
+
+> **程序结构最好与我们解释“为什么它正确”的结构相匹配。**
+
+---
+
 ## 参考阅读
 [^1]: Dijkstra, E. W. (1972). *The Humble Programmer*. Communications of the ACM, 15(10), 859-866.
 [^2]: 理解软件复杂性
