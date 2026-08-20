@@ -207,79 +207,107 @@ COMMIT
 
 当我们以各种性质和不变量保证系统行为的正确性，又有构建好的抽象去支撑这些性质，我们对系统的实现就更为自然和直接，理解的难度也大幅下降。从某种程度上说，这种对正确性的分析，就是一种软件设计的**启发式方法**（Design Heuristics）。
 
-我们再看一个例子。
+我们再看一个例子：**商品库存管理**。场景很简单：商品只剩 1 件，10 个用户同时下单。
 
-## 3. 库存系统：正确性如何产生新的业务抽象
+从程序视角看，只要保证库存数量被正常更新，然后相应处理订单即可：
 
-### 写什么
+```python
+stock = get_stock(sku)
 
-用另一个领域补强：
+if stock >= quantity:
+    create_order()
+    update_stock(stock - quantity)
+```
+我们也很容易想到，库存更新的一些其他场景：系统不仅要保证最后一件商品正常出售，还要保证不会超卖、不会重复扣库存、未付款订单不会永久占库存、已付款订单不会因为库存释放而丢失商品等等。
 
-> 商品库存不能被重复承诺。
+有了前面的经验，我们可以先不关注程序框架，以及分场景的修补和实现，而是尝试提炼系统行为的属性或不变量。可以这样考虑：
 
-从简单 `stock -= 1` 出发，发现它不足以表达真实业务。
+1. **库存不能被超卖**。
 
-进而产生：
-
-> Reservation。
-
-### 怎么展开
-
-简单展示：
+这里马上出现一个业务理解问题：“库存”到底指什么？真实电商系统通常至少有：
 
 ```text
-有限库存不能被重复承诺
-→ reservation
-
-reservation 不能重复释放
-→ idempotent lifecycle
-
-订单状态不能任意跳转
-→ state machine
+physical stock      实物库存
+reserved stock      已预占库存
+available stock     可售库存
 ```
+于是有：
 
-突出：
+   $$
+   reserved≤physical
+   $$
+
+以及：
+
+   $$
+   available=physical−reserved≥0
+   $$
+2. **一个库存单位不能同时承诺给两个订单**。
+
+假设只剩一件，对于两个订单 $A$ 和 $B$，最多只能有一个订单进入 `RESERVED` 状态：
+
+$$
+reserved(A, B) \leq 1
+$$
+
+其中，`reserved(A, B)` 表示订单 A 和 B 中处于 `RESERVED` 状态的订单数量。
+
+更一般地，对于同一商品，已预占库存不能超过实物库存：
+
+$$
+reserved(sku) \leq physical(sku)
+$$
+
+这其实是比简单的 `stock >= 0` 更接近真实业务语义的规则。
+
+
+3. **订单和库存状态必须保持一致**。
+
+订单状态和库存预占状态之间必须满足以下关系：
+
+$$
+status(order) \in \{PAID, READY\_TO\_SHIP\}
+\Rightarrow reservation(order) = valid
+$$
+
+$$
+status(order) \in \{CANCELLED, EXPIRED\}
+\Rightarrow reservation(order) = released
+$$
+
+也就是说，已支付或待发货的订单必须存在有效预占；已取消或已过期的订单则必须释放预占。
+
+这已经不是库存管理本身的正确性，而是整体系统状态的一致性。
+
+4. **预占不是永久的**。
+
+如果用户下单成功，系统预占库存，但用户从此不去付款，那么库存显然不能永远锁死。所以 `reservation` 的状态转换必须满足：
+
+$$
+reservation = ACTIVE
+\land payment\_successful
+\Rightarrow reservation' = CONSUMED
+$$
+
+$$
+reservation = ACTIVE
+\land (timeout \lor cancelled)
+\Rightarrow reservation' = RELEASED
+$$
+
+也就是说，预占只有在付款成功后才能变为 `CONSUMED`，或者在超时、取消后变为 `RELEASED`。
+
+这样我们第一次发现：**预占（Reservation）** 本身应该是一个明确的**业务对象**，而不只是库存表里的一个动态数值。
 
 > 有时候正确性要求甚至会让我们发现一个原本不存在于技术设计里的业务概念。
 
----
+基于这些不变量，我们可以自然的推理出一个库存管理系统所涉及的领域对象，以及各个对象的分工和协作。
 
-## 4. Test、Property 与 Proof 的关系
+需要一个什么，来提供什么的保证。
+需要一个什么，来保证什么的正确性。
+......
 
-### 写什么
-
-结合 Jasmine `describe / it`。
-
-例如：
-
-```text
-describe("money conservation")
-    it(...)
-    it(...)
-    it(...)
-```
-
-说明：
-
-* `it`：具体 example；
-* `describe`：可以组织一组行为；
-* property / invariant：描述整个 computation class；
-* proof：在明确假设下说明所有合法执行都保持该性质。
-
-### 怎么展开
-
-重点不要讨论形式化验证技术。
-
-只表达：
-
-> invariant 不替代测试；
-> invariant 告诉我们测试究竟在试图破坏什么。
-
-并提出：
-
-> 测试套件最好的状态，是逐渐成为 executable specification，而不是 case 的集合。
-
----
+提出四层可信度模型。
 
 ## 5. Correctness by Construction
 
@@ -311,6 +339,7 @@ desired behavior
 
 > **程序结构最好与我们解释“为什么它正确”的结构相匹配。**
 
+坏设计会提前暴露。
 ---
 
 ## 参考阅读
